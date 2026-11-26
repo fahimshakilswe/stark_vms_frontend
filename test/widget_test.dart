@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stark_vms_frontend/core/utils/validators.dart';
+import 'package:stark_vms_frontend/core/widgets/app_button.dart';
 import 'package:stark_vms_frontend/main.dart';
 
 void main() {
@@ -37,6 +39,31 @@ void main() {
       // Verify that StarkVmsApp builds without throwing No MaterialLocalizations found
       await tester.pump();
       expect(find.byType(StarkVmsApp), findsOneWidget);
+    });
+
+    testWidgets('AppButton renders properly without assertion failure on shape and borderRadius', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                AppButton(label: 'Primary', onPressed: () {}),
+                AppButton(label: 'Secondary', variant: AppButtonVariant.secondary, onPressed: () {}),
+                AppButton(label: 'Outline', variant: AppButtonVariant.outline, onPressed: () {}),
+                AppButton(label: 'Destructive', variant: AppButtonVariant.destructive, onPressed: () {}),
+                AppButton(label: 'Ghost', variant: AppButtonVariant.ghost, onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('Primary'), findsOneWidget);
+      expect(find.text('Secondary'), findsOneWidget);
+      expect(find.text('Outline'), findsOneWidget);
+      expect(find.text('Destructive'), findsOneWidget);
+      expect(find.text('Ghost'), findsOneWidget);
     });
   });
 }

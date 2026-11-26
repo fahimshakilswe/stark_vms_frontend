@@ -137,7 +137,6 @@ class AppButton extends StatelessWidget {
       width: isFullWidth ? double.infinity : null,
       child: Material(
         color: bg,
-        borderRadius: BorderRadius.circular(6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(6),
           side: BorderSide(color: border, width: 1),
