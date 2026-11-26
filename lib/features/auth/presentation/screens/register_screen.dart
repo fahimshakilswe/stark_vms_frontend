@@ -172,7 +172,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             // Full Name input
             AppTextField(
               label: 'Full Name',
-              hint: 'e.g. John Doe',
+              hint: 'e.g. Fahim Shakil',
               controller: _fullNameController,
               isRequired: true,
               validator: Validators.validateFullName,
@@ -187,7 +187,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             // Email input
             AppTextField(
               label: 'Email Address',
-              hint: 'e.g. john.doe@stark.com',
+              hint: 'e.g. fahim.shakil@stark.com',
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               isRequired: true,

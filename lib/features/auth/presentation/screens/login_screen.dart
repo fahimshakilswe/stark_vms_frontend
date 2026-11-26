@@ -93,7 +93,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             // Email input
             AppTextField(
               label: 'Email Address',
-              hint: 'e.g. john.doe@stark.com',
+              hint: 'e.g. fahim.shakil@stark.com',
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               isRequired: true,
@@ -109,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             // Password input
             AppTextField(
               label: 'Password',
-              hint: '••••••••',
+              hint: '******',
               controller: _passwordController,
               isPassword: true,
               isRequired: true,
