@@ -1,30 +1,26 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:stark_vms_frontend/main.dart';
+import 'package:stark_vms_frontend/core/utils/validators.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('Validators Unit Tests', () {
+    test('validateEmail validates correct email format', () {
+      expect(Validators.validateEmail('user@stark.com'), isNull);
+      expect(Validators.validateEmail(''), 'Email is required');
+      expect(Validators.validateEmail('invalid-email'), 'Please enter a valid email address');
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('validateStrongPassword enforces backend complexity requirements', () {
+      expect(Validators.validateStrongPassword('ValidPass123!'), isNull);
+      expect(Validators.validateStrongPassword('short1!'), 'Password must be at least 8 characters');
+      expect(Validators.validateStrongPassword('alllowercase1!'), 'Password must contain at least one uppercase letter (A-Z)');
+      expect(Validators.validateStrongPassword('ALLUPPERCASE1!'), 'Password must contain at least one lowercase letter (a-z)');
+      expect(Validators.validateStrongPassword('NoSpecialChar123'), 'Password must contain at least one special character (!@#\$%...)');
+      expect(Validators.validateStrongPassword('NoNumbersHere!'), 'Password must contain at least one digit (0-9)');
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    test('validateVehicleNumber checks non-empty and length limit', () {
+      expect(Validators.validateVehicleNumber('DHAKA-METRO-GA-1234'), isNull);
+      expect(Validators.validateVehicleNumber(''), 'Vehicle number is required');
+    });
   });
 }
