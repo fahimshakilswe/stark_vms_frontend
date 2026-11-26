@@ -1,5 +1,7 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stark_vms_frontend/core/utils/validators.dart';
+import 'package:stark_vms_frontend/main.dart';
 
 void main() {
   group('Validators Unit Tests', () {
@@ -21,6 +23,20 @@ void main() {
     test('validateVehicleNumber checks non-empty and length limit', () {
       expect(Validators.validateVehicleNumber('DHAKA-METRO-GA-1234'), isNull);
       expect(Validators.validateVehicleNumber(''), 'Vehicle number is required');
+    });
+  });
+
+  group('Widget Rendering Tests', () {
+    testWidgets('AppTextField renders properly within StarkVmsApp without missing MaterialLocalizations', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: StarkVmsApp(),
+        ),
+      );
+
+      // Verify that StarkVmsApp builds without throwing No MaterialLocalizations found
+      await tester.pump();
+      expect(find.byType(StarkVmsApp), findsOneWidget);
     });
   });
 }

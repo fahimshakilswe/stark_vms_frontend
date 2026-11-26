@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:stark_vms_frontend/core/config/env_config.dart';
@@ -26,11 +27,27 @@ class StarkVmsApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
-    return ShadApp.router(
-      title: EnvConfig.appName,
-      debugShowCheckedModeBanner: false,
+    return ShadApp.custom(
       theme: AppTheme.shadcnTheme(),
-      routerConfig: router,
+      appBuilder: (context) {
+        return MaterialApp.router(
+          title: EnvConfig.appName,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.materialTheme(),
+          routerConfig: router,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', 'US'),
+          ],
+          builder: (context, child) {
+            return ShadAppBuilder(child: child!);
+          },
+        );
+      },
     );
   }
 }
