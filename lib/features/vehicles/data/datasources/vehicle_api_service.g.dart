@@ -27,10 +27,10 @@ class _VehicleApiService implements VehicleApiService {
     String sortBy = 'createdAt',
     String sortDir = 'desc',
     String? search,
-    String? company,
-    String? type,
+    String? vehicleType,
     String? brand,
     String? model,
+    String? fuelType,
     String? status,
   }) async {
     final _extra = <String, dynamic>{};
@@ -40,10 +40,10 @@ class _VehicleApiService implements VehicleApiService {
       r'sortBy': sortBy,
       r'sortDir': sortDir,
       r'search': search,
-      r'company': company,
-      r'type': type,
+      r'vehicleType': vehicleType,
       r'brand': brand,
       r'model': model,
+      r'fuelType': fuelType,
       r'status': status,
     };
     queryParameters.removeWhere((k, v) => v == null);

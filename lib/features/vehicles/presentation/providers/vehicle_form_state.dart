@@ -5,6 +5,7 @@ class VehicleFormState {
   final bool isSaving;
   final bool isSuccess;
   final String? errorMessage;
+  final String? vehicleNumberError;
   final Map<String, String>? validationErrors;
   final VehicleEntity? vehicle;
 
@@ -13,6 +14,7 @@ class VehicleFormState {
     this.isSaving = false,
     this.isSuccess = false,
     this.errorMessage,
+    this.vehicleNumberError,
     this.validationErrors,
     this.vehicle,
   });
@@ -22,18 +24,24 @@ class VehicleFormState {
     bool? isSaving,
     bool? isSuccess,
     String? errorMessage,
+    String? vehicleNumberError,
     Map<String, String>? validationErrors,
     VehicleEntity? vehicle,
     bool clearError = false,
+    bool clearVehicleNumberError = false,
+    bool clearVehicle = false,
   }) {
     return VehicleFormState(
       isLoading: isLoading ?? this.isLoading,
       isSaving: isSaving ?? this.isSaving,
       isSuccess: isSuccess ?? this.isSuccess,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      vehicleNumberError: clearVehicleNumberError || clearError
+          ? null
+          : (vehicleNumberError ?? this.vehicleNumberError),
       validationErrors:
           clearError ? null : (validationErrors ?? this.validationErrors),
-      vehicle: vehicle ?? this.vehicle,
+      vehicle: clearVehicle ? null : (vehicle ?? this.vehicle),
     );
   }
 }

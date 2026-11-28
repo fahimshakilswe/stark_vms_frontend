@@ -78,15 +78,8 @@ Dio createDioClient(
 AppException handleDioError(DioException error) {
   final response = error.response;
   if (response == null) {
-    if (error.type == DioExceptionType.connectionTimeout ||
-        error.type == DioExceptionType.sendTimeout ||
-        error.type == DioExceptionType.receiveTimeout) {
-      return const NetworkException(
-        message: 'Connection timed out. Please check server availability.',
-      );
-    }
     return const NetworkException(
-      message: 'Network error. Please check your internet connection.',
+      message: 'Unable to connect to the server. Please check your connection and try again.',
     );
   }
 

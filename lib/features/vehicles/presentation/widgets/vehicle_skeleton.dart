@@ -16,12 +16,17 @@ class VehicleTableSkeleton extends StatelessWidget {
       6,
       (i) => VehicleEntity(
         id: i,
-        vehicleNumber: 'DHAKA-METRO-GA-123$i',
-        company: 'Logistics Enterprise Fleet',
-        type: 'Delivery Van',
-        brand: 'Mercedes-Benz',
-        model: 'Sprinter Cargo',
-        status: 'ACTIVE',
+        vehicleNumber: 'DHA-METRO-GA-11-100$i',
+        vehicleType: 'CAR',
+        brand: 'Toyota',
+        model: 'Corolla Altis',
+        manufacturingYear: 2022,
+        color: 'Silver',
+        fuelType: 'OCTANE',
+        seatingCapacity: 5,
+        driverName: 'Driver $i',
+        driverPhone: '+880171100000$i',
+        status: 'Available',
       ),
     );
 

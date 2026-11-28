@@ -19,10 +19,10 @@ abstract class VehicleApiService {
     @Query('sortBy') String sortBy = 'createdAt',
     @Query('sortDir') String sortDir = 'desc',
     @Query('search') String? search,
-    @Query('company') String? company,
-    @Query('type') String? type,
+    @Query('vehicleType') String? vehicleType,
     @Query('brand') String? brand,
     @Query('model') String? model,
+    @Query('fuelType') String? fuelType,
     @Query('status') String? status,
   });
 

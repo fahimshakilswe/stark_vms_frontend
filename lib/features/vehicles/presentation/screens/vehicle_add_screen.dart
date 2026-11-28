@@ -26,10 +26,15 @@ class _VehicleAddScreenState extends ConsumerState<VehicleAddScreen> {
   Future<void> _handleSubmit(VehicleFormData data) async {
     final success = await ref.read(vehicleFormNotifierProvider.notifier).createVehicle(
           vehicleNumber: data.vehicleNumber,
-          company: data.company,
-          type: data.type,
+          vehicleType: data.vehicleType,
           brand: data.brand,
           model: data.model,
+          manufacturingYear: data.manufacturingYear,
+          color: data.color,
+          fuelType: data.fuelType,
+          seatingCapacity: data.seatingCapacity,
+          driverName: data.driverName,
+          driverPhone: data.driverPhone,
           status: data.status,
         );
 
@@ -67,6 +72,7 @@ class _VehicleAddScreenState extends ConsumerState<VehicleAddScreen> {
           VehicleForm(
             isSaving: formState.isSaving,
             errorMessage: formState.errorMessage,
+            vehicleNumberError: formState.vehicleNumberError,
             onSubmit: _handleSubmit,
             onCancel: () => context.go(AppRoutes.vehicles),
           ),

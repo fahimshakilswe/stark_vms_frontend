@@ -21,9 +21,16 @@ class VehicleMobileCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x04000000),
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,9 +41,9 @@ class VehicleMobileCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: const Color(0xFFE8F1F8),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                  border: Border.all(color: const Color(0xFFB3D4EE)),
                 ),
                 child: Text(
                   vehicle.vehicleNumber,
@@ -44,7 +51,7 @@ class VehicleMobileCard extends StatelessWidget {
                     fontFamily: 'monospace',
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: AppColors.deepBlue,
                   ),
                 ),
               ),
@@ -53,20 +60,35 @@ class VehicleMobileCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            vehicle.company,
+            '${vehicle.brand} ${vehicle.model}',
             style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.charcoal,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            '${vehicle.brand} ${vehicle.model} • ${vehicle.type}',
+            '${vehicle.vehicleType} • ${vehicle.fuelType}${vehicle.manufacturingYear != null ? ' • ${vehicle.manufacturingYear}' : ''}',
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
             ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 16,
+            runSpacing: 6,
+            children: [
+              if (vehicle.color != null && vehicle.color!.trim().isNotEmpty)
+                _buildInfoChip(Icons.palette_outlined, vehicle.color!),
+              if (vehicle.seatingCapacity != null)
+                _buildInfoChip(Icons.event_seat_outlined, '${vehicle.seatingCapacity} seats'),
+              if (vehicle.driverName != null && vehicle.driverName!.trim().isNotEmpty)
+                _buildInfoChip(Icons.person_outline_rounded, vehicle.driverName!),
+              if (vehicle.driverPhone != null && vehicle.driverPhone!.trim().isNotEmpty)
+                _buildInfoChip(Icons.phone_outlined, vehicle.driverPhone!),
+            ],
           ),
           const SizedBox(height: 12),
           const Divider(height: 1, color: AppColors.border),
@@ -79,7 +101,7 @@ class VehicleMobileCard extends StatelessWidget {
                 icon: const Icon(Icons.edit_outlined, size: 16),
                 label: const Text('Edit'),
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.textPrimary,
+                  foregroundColor: AppColors.corporateBlue,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 ),
               ),
@@ -89,7 +111,7 @@ class VehicleMobileCard extends StatelessWidget {
                 icon: const Icon(Icons.delete_outline_rounded, size: 16),
                 label: const Text('Delete'),
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.destructive,
+                  foregroundColor: AppColors.red,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 ),
               ),
@@ -97,6 +119,23 @@ class VehicleMobileCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: AppColors.textMuted),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }

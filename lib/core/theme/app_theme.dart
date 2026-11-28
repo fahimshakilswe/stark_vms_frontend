@@ -8,19 +8,20 @@ class AppTheme {
 
   static const double borderRadius = 8.0;
 
-  /// Shadcn UI Theme data for Stark VMS
+  /// Shadcn UI Theme data for Stark Group VMS
   static ShadThemeData shadcnTheme() {
     return ShadThemeData(
       brightness: Brightness.light,
       colorScheme: const ShadSlateColorScheme.light(
-        primary: AppColors.primary,
-        primaryForeground: AppColors.primaryForeground,
-        background: AppColors.background,
-        card: AppColors.surface,
+        primary: AppColors.corporateBlue,
+        primaryForeground: Colors.white,
+        background: AppColors.softGray,
+        card: AppColors.white,
         border: AppColors.border,
         muted: AppColors.surfaceSecondary,
         mutedForeground: AppColors.textSecondary,
-        destructive: AppColors.destructive,
+        destructive: AppColors.red,
+        destructiveForeground: Colors.white,
       ),
       radius: const BorderRadius.all(Radius.circular(borderRadius)),
     );
@@ -31,18 +32,18 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.accent,
-        primary: AppColors.primary,
-        secondary: AppColors.accent,
-        surface: AppColors.surface,
-        error: AppColors.destructive,
+        seedColor: AppColors.corporateBlue,
+        primary: AppColors.corporateBlue,
+        secondary: AppColors.deepBlue,
+        surface: AppColors.white,
+        error: AppColors.red,
         brightness: Brightness.light,
       ),
-      scaffoldBackgroundColor: AppColors.background,
-      fontFamily: 'Inter',
+      scaffoldBackgroundColor: AppColors.softGray,
+      fontFamily: 'Roboto',
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.deepBlue,
         elevation: 0,
         centerTitle: false,
         scrolledUnderElevation: 1,
@@ -51,7 +52,7 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surface,
+        color: AppColors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
@@ -60,7 +61,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: AppColors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
@@ -76,17 +77,17 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
-          borderSide: const BorderSide(color: AppColors.destructive),
+          borderSide: const BorderSide(color: AppColors.red),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
-          borderSide: const BorderSide(color: AppColors.destructive, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.red, width: 1.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.primaryForeground,
+          backgroundColor: AppColors.corporateBlue,
+          foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           shape: RoundedRectangleBorder(
@@ -97,7 +98,7 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textPrimary,
+          foregroundColor: AppColors.charcoal,
           side: const BorderSide(color: AppColors.border),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           shape: RoundedRectangleBorder(
@@ -106,18 +107,10 @@ class AppTheme {
           textStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
         ),
       ),
-      dataTableTheme: DataTableThemeData(
-        headingRowColor: WidgetStateProperty.all(AppColors.surfaceSecondary),
-        headingTextStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-          fontSize: 13,
-        ),
-        dataTextStyle: const TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 14,
-        ),
-        dividerThickness: 1,
+      dividerTheme: const DividerThemeData(
+        color: AppColors.border,
+        thickness: 1,
+        space: 1,
       ),
     );
   }

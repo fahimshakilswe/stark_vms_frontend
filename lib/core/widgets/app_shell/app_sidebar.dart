@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:stark_vms_frontend/core/config/env_config.dart';
 import 'package:stark_vms_frontend/core/router/route_names.dart';
 import 'package:stark_vms_frontend/core/theme/app_colors.dart';
 import 'package:stark_vms_frontend/core/widgets/app_shell/sidebar_item.dart';
@@ -22,6 +21,11 @@ class AppSidebar extends ConsumerWidget {
 
   static const List<SidebarItemData> navItems = [
     SidebarItemData(
+      title: 'Dashboard',
+      icon: Icons.dashboard_rounded,
+      route: AppRoutes.dashboard,
+    ),
+    SidebarItemData(
       title: 'Vehicle Fleet',
       icon: Icons.directions_car_filled_outlined,
       route: AppRoutes.vehicles,
@@ -37,7 +41,7 @@ class AppSidebar extends ConsumerWidget {
     final confirmed = await ConfirmDialog.show(
       context,
       title: 'Log out',
-      message: 'Are you sure you want to log out of Stark VMS?',
+      message: 'Are you sure you want to log out of Stark Group VMS?',
       confirmLabel: 'Log out',
       isDestructive: true,
     );
@@ -76,9 +80,9 @@ class AppSidebar extends ConsumerWidget {
                   const Padding(
                     padding: EdgeInsets.only(left: 20, top: 8, bottom: 8),
                     child: Text(
-                      'MANAGEMENT',
+                      'FLEET SYSTEM',
                       style: TextStyle(
-                        color: Color(0xFF64748B),
+                        color: Color(0xFF93C5FD),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.8,
@@ -105,9 +109,9 @@ class AppSidebar extends ConsumerWidget {
             ),
           ),
 
-          // User Profile & Logout section
+          // Bottom User Profile & Logout section
           const Divider(height: 1, color: AppColors.sidebarBorder),
-          _buildProfileFooter(context, ref),
+          _buildUserSection(context, ref),
         ],
       ),
     );
@@ -116,59 +120,56 @@ class AppSidebar extends ConsumerWidget {
   Widget _buildBrandHeader(BuildContext context) {
     return Container(
       height: 64,
-      padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 12 : 18),
+      padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 12 : 20),
       alignment: Alignment.centerLeft,
       child: Row(
-        mainAxisAlignment:
-            isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.corporateBlue,
               borderRadius: BorderRadius.circular(8),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x332563EB),
-                  blurRadius: 6,
-                  offset: Offset(0, 2),
-                ),
-              ],
             ),
-            child: const Icon(
-              Icons.shield_rounded,
-              color: Colors.white,
-              size: 20,
+            child: const Center(
+              child: Icon(
+                Icons.directions_car_filled_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           if (!isCollapsed) ...[
             const SizedBox(width: 12),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  EnvConfig.appName,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    letterSpacing: -0.3,
+            const Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'STARK GROUP',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  'Enterprise Fleet',
-                  style: TextStyle(
-                    color: AppColors.sidebarForeground.withValues(alpha: 0.6),
-                    fontSize: 11.5,
+                  Text(
+                    'Fleet Management',
+                    style: TextStyle(
+                      color: Color(0xFFB3D4EE),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ],
@@ -176,78 +177,66 @@ class AppSidebar extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileFooter(BuildContext context, WidgetRef ref) {
+  Widget _buildUserSection(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authNotifierProvider).user;
 
-    if (isCollapsed) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: IconButton(
-          icon: const Icon(
-            Icons.logout_rounded,
-            color: Color(0xFF94A3B8),
-            size: 20,
-          ),
-          tooltip: 'Log out',
-          onPressed: () => _handleLogout(context, ref),
-        ),
-      );
-    }
-
-    final displayName = user?.fullName.isNotEmpty == true ? user!.fullName : 'Fleet Officer';
-    final displayEmail = user?.email.isNotEmpty == true ? user!.email : 'user@stark.com';
-
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(isCollapsed ? 10 : 16),
       child: Row(
         children: [
           CircleAvatar(
             radius: 17,
-            backgroundColor: AppColors.accent.withValues(alpha: 0.2),
+            backgroundColor: AppColors.corporateBlue,
             child: Text(
-              displayName.substring(0, 1).toUpperCase(),
+              user?.fullName.isNotEmpty == true
+                  ? user!.fullName.substring(0, 1).toUpperCase()
+                  : 'S',
               style: const TextStyle(
-                color: AppColors.accent,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
             ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  displayName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+          if (!isCollapsed) ...[
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    user?.fullName ?? 'Fleet Admin',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  displayEmail,
-                  style: const TextStyle(
-                    color: Color(0xFF94A3B8),
-                    fontSize: 11.5,
+                  Text(
+                    user?.email ?? 'admin@stark.com',
+                    style: const TextStyle(
+                      color: Color(0xFF93C5FD),
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.logout_rounded,
-              color: Color(0xFF94A3B8),
-              size: 19,
+            IconButton(
+              icon: const Icon(
+                Icons.logout_rounded,
+                color: Color(0xFFFCA5A5),
+                size: 18,
+              ),
+              tooltip: 'Log out',
+              onPressed: () => _handleLogout(context, ref),
             ),
-            tooltip: 'Log out',
-            onPressed: () => _handleLogout(context, ref),
-          ),
+          ],
         ],
       ),
     );

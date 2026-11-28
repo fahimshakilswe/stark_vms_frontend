@@ -1,98 +1,117 @@
 import 'package:flutter/material.dart';
 
-/// Professional enterprise SaaS color palette for Stark VMS.
+/// Enterprise color palette for Stark Group VMS according to design specifications:
+/// - Deep Blue: `#1F4E79` — Navigation, sidebar, headings, headers.
+/// - Corporate Blue: `#5B9BD5` — Primary actions, buttons, active highlights.
+/// - Soft Gray: `#F5F7FA` — Page background.
+/// - White: `#FFFFFF` — Cards, forms and tables surfaces.
+/// - Charcoal: `#1F2937` — Main text.
+/// - Green: `#2E7D32` — Active and success states.
+/// - Red: `#D32F2F` — Delete, destructive, and error actions only.
 class AppColors {
   AppColors._();
 
-  // Primary Brand Colors (Deep Slate / Stark Blue)
-  static const Color primary = Color(0xFF0F172A); // slate-900
-  static const Color primaryHover = Color(0xFF1E293B); // slate-800
-  static const Color primaryForeground = Color(0xFFF8FAFC); // slate-50
+  // Core Specification Palette
+  static const Color deepBlue = Color(0xFF1F4E79); // Navigation and headings
+  static const Color corporateBlue = Color(0xFF5B9BD5); // Primary actions & highlights
+  static const Color softGray = Color(0xFFF5F7FA); // Page background
+  static const Color white = Color(0xFFFFFFFF); // Cards, forms and tables
+  static const Color charcoal = Color(0xFF1F2937); // Main text
+  static const Color green = Color(0xFF2E7D32); // Active and success states
+  static const Color red = Color(0xFFD32F2F); // Delete and error actions only
 
-  // Secondary & Accents
-  static const Color accent = Color(0xFF2563EB); // blue-600
-  static const Color accentHover = Color(0xFF1D4ED8); // blue-700
+  // Aliases for clean architecture semantics
+  static const Color primary = corporateBlue;
+  static const Color primaryDark = deepBlue;
+  static const Color primaryForeground = Colors.white;
+
+  static const Color accent = corporateBlue;
+  static const Color accentHover = Color(0xFF4A88BF);
   static const Color accentForeground = Colors.white;
 
-  // Background & Surfaces
-  static const Color background = Color(0xFFF8FAFC); // slate-50
-  static const Color surface = Colors.white;
-  static const Color surfaceSecondary = Color(0xFFF1F5F9); // slate-100
+  // Backgrounds & Surfaces
+  static const Color background = softGray;
+  static const Color surface = white;
+  static const Color surfaceSecondary = Color(0xFFEDF2F7);
 
-  // Sidebar specific
-  static const Color sidebarBackground = Color(0xFF0F172A);
+  // Sidebar Specific
+  static const Color sidebarBackground = deepBlue;
   static const Color sidebarForeground = Color(0xFFE2E8F0);
-  static const Color sidebarSelected = Color(0xFF1E293B);
-  static const Color sidebarBorder = Color(0xFF334155);
+  static const Color sidebarSelected = Color(0xFF163857);
+  static const Color sidebarBorder = Color(0xFF2B5B88);
 
   // Borders & Dividers
-  static const Color border = Color(0xFFE2E8F0); // slate-200
-  static const Color borderSubtle = Color(0xFFF1F5F9); // slate-100
-  static const Color borderFocus = Color(0xFF2563EB); // blue-600
+  static const Color border = Color(0xFFE2E8F0);
+  static const Color borderSubtle = Color(0xFFEDF2F7);
+  static const Color borderFocus = corporateBlue;
 
   // Text Colors
-  static const Color textPrimary = Color(0xFF0F172A); // slate-900
-  static const Color textSecondary = Color(0xFF64748B); // slate-500
-  static const Color textMuted = Color(0xFF94A3B8); // slate-400
+  static const Color textPrimary = charcoal;
+  static const Color textSecondary = Color(0xFF4B5563);
+  static const Color textMuted = Color(0xFF9CA3AF);
 
   // Feedback & Status Colors
-  static const Color success = Color(0xFF10B981); // emerald-500
-  static const Color successBackground = Color(0xFFECFDF5); // emerald-50
-  static const Color successBorder = Color(0xFFA7F3D0); // emerald-200
+  static const Color success = green;
+  static const Color successBackground = Color(0xFFE8F5E9);
+  static const Color successBorder = Color(0xFFA5D6A7);
 
-  static const Color warning = Color(0xFFF59E0B); // amber-500
-  static const Color warningBackground = Color(0xFFFFFBEB); // amber-50
-  static const Color warningBorder = Color(0xFFFDE68A); // amber-200
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color warningBackground = Color(0xFFFFFBEB);
+  static const Color warningBorder = Color(0xFFFDE68A);
 
-  static const Color destructive = Color(0xFFEF4444); // red-500
-  static const Color destructiveBackground = Color(0xFFFEF2F2); // red-50
-  static const Color destructiveBorder = Color(0xFFFECACA); // red-200
+  static const Color destructive = red;
+  static const Color destructiveBackground = Color(0xFFFFEBEE);
+  static const Color destructiveBorder = Color(0xFFFFCDD2);
 
-  static const Color info = Color(0xFF3B82F6); // blue-500
-  static const Color infoBackground = Color(0xFFEFF6FF); // blue-50
-  static const Color infoBorder = Color(0xFFBFDBFE); // blue-200
+  static const Color info = corporateBlue;
+  static const Color infoBackground = Color(0xFFEBF3FA);
+  static const Color infoBorder = Color(0xFFBCE0FD);
 
-  // Vehicle Status Badges
+  // Vehicle Status Badge Colors
+  // Statuses: AVAILABLE, ACTIVE, INACTIVE, MAINTENANCE
   static Color statusColor(String status) {
-    switch (status.toUpperCase()) {
+    final clean = status.trim().toUpperCase();
+    switch (clean) {
+      case 'AVAILABLE':
+        return green;
       case 'ACTIVE':
-        return success;
+        return corporateBlue;
+      case 'MAINTENCE':
       case 'MAINTENANCE':
-        return warning;
+        return const Color(0xFFD97706);
       case 'INACTIVE':
-        return textSecondary;
-      case 'RETIRED':
-        return destructive;
       default:
         return textSecondary;
     }
   }
 
   static Color statusBackground(String status) {
-    switch (status.toUpperCase()) {
-      case 'ACTIVE':
+    final clean = status.trim().toUpperCase();
+    switch (clean) {
+      case 'AVAILABLE':
         return successBackground;
+      case 'ACTIVE':
+        return infoBackground;
+      case 'MAINTENCE':
       case 'MAINTENANCE':
-        return warningBackground;
+        return const Color(0xFFFEF3C7);
       case 'INACTIVE':
-        return surfaceSecondary;
-      case 'RETIRED':
-        return destructiveBackground;
       default:
         return surfaceSecondary;
     }
   }
 
   static Color statusBorder(String status) {
-    switch (status.toUpperCase()) {
-      case 'ACTIVE':
+    final clean = status.trim().toUpperCase();
+    switch (clean) {
+      case 'AVAILABLE':
         return successBorder;
+      case 'ACTIVE':
+        return infoBorder;
+      case 'MAINTENCE':
       case 'MAINTENANCE':
-        return warningBorder;
+        return const Color(0xFFFDE68A);
       case 'INACTIVE':
-        return border;
-      case 'RETIRED':
-        return destructiveBorder;
       default:
         return border;
     }

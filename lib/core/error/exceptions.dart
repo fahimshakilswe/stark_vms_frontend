@@ -69,7 +69,7 @@ class ValidationException extends AppException {
 
 class NetworkException extends AppException {
   const NetworkException({
-    super.message = 'Network connection failed. Please verify your internet or backend connection.',
+    super.message = 'Unable to connect to the server. Please check your connection and try again.',
     super.statusCode,
   });
 }

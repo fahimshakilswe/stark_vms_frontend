@@ -6,6 +6,7 @@ import 'package:stark_vms_frontend/core/storage/token_storage.dart';
 import 'package:stark_vms_frontend/core/widgets/app_shell/app_shell.dart';
 import 'package:stark_vms_frontend/features/auth/presentation/screens/login_screen.dart';
 import 'package:stark_vms_frontend/features/auth/presentation/screens/register_screen.dart';
+import 'package:stark_vms_frontend/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/screens/vehicle_add_screen.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/screens/vehicle_edit_screen.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/screens/vehicle_list_screen.dart';
@@ -14,7 +15,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final tokenStorage = ref.watch(tokenStorageProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.vehicles,
+    initialLocation: AppRoutes.dashboard,
     redirect: (context, state) async {
       final hasToken = await tokenStorage.hasToken();
       final isAuthRoute = state.matchedLocation == AppRoutes.login ||
@@ -25,9 +26,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         return AppRoutes.login;
       }
 
-      // Authenticated users attempting to access login or register are redirected to vehicles
-      if (hasToken && isAuthRoute) {
-        return AppRoutes.vehicles;
+      // Authenticated users attempting to access login, register or root are redirected to dashboard
+      if (hasToken && (isAuthRoute || state.matchedLocation == '/')) {
+        return AppRoutes.dashboard;
       }
 
       return null;
@@ -47,6 +48,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
+          GoRoute(
+            path: AppRoutes.dashboard,
+            builder: (context, state) => const DashboardScreen(),
+          ),
           GoRoute(
             path: AppRoutes.vehicles,
             builder: (context, state) => const VehicleListScreen(),
@@ -79,8 +84,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.go(AppRoutes.vehicles),
-              child: const Text('Go to Vehicles'),
+              onPressed: () => context.go(AppRoutes.dashboard),
+              child: const Text('Go to Dashboard'),
             ),
           ],
         ),
@@ -88,6 +93,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ),
   );
 });
-
-
-

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:stark_vms_frontend/core/router/route_names.dart';
+import 'package:stark_vms_frontend/core/theme/app_colors.dart';
 import 'package:stark_vms_frontend/core/utils/toast_utils.dart';
 import 'package:stark_vms_frontend/core/widgets/app_button.dart';
 import 'package:stark_vms_frontend/core/widgets/confirm_dialog.dart';
@@ -10,119 +10,55 @@ import 'package:stark_vms_frontend/core/widgets/empty_state_view.dart';
 import 'package:stark_vms_frontend/core/widgets/error_state_view.dart';
 import 'package:stark_vms_frontend/core/widgets/page_header.dart';
 import 'package:stark_vms_frontend/features/vehicles/domain/entities/vehicle_entity.dart';
+import 'package:stark_vms_frontend/features/vehicles/presentation/providers/vehicle_list_state.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/providers/vehicle_providers.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/widgets/vehicle_filter_bar.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/widgets/vehicle_mobile_card.dart';
+import 'package:stark_vms_frontend/features/vehicles/presentation/widgets/vehicle_pagination_bar.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/widgets/vehicle_skeleton.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/widgets/vehicle_table.dart';
 
-class VehicleListScreen extends ConsumerStatefulWidget {
+class VehicleListScreen extends ConsumerWidget {
   const VehicleListScreen({super.key});
 
-  @override
-  ConsumerState<VehicleListScreen> createState() => _VehicleListScreenState();
-}
-
-class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
-  static const int _pageSize = 10;
-  late final PagingController<int, VehicleEntity> _pagingController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pagingController = PagingController<int, VehicleEntity>(
-      fetchPage: (int pageKey) async {
-        final filter = ref.read(vehicleFilterProvider);
-        final getVehiclesUseCase = ref.read(getVehiclesUseCaseProvider);
-
-        final pageData = await getVehiclesUseCase(
-          page: pageKey,
-          size: _pageSize,
-          sortBy: filter.sortBy,
-          sortDir: filter.sortDir,
-          search: filter.searchQuery,
-          status: filter.statusFilter,
-        );
-
-        return pageData.vehicles;
-      },
-      getNextPageKey: (PagingState<int, VehicleEntity> state) {
-        if (state.pages.isEmpty) return 0;
-        final lastPage = state.pages.last;
-        if (lastPage.length < _pageSize) return null;
-        return (state.keys.lastOrNull ?? 0) + 1;
-      },
-    );
-  }
-
-  void _onFilterChanged() {
-    _pagingController.refresh();
-  }
-
-  void _navigateToEdit(VehicleEntity vehicle) {
+  void _navigateToEdit(BuildContext context, VehicleEntity vehicle) {
     context.go(AppRoutes.editVehiclePath(vehicle.id));
   }
 
-  Future<void> _handleDelete(VehicleEntity vehicle) async {
-    final confirmed = await ConfirmDialog.show(
+  Future<void> _handleDelete(
+    BuildContext context,
+    WidgetRef ref,
+    VehicleEntity vehicle,
+  ) async {
+    final result = await ConfirmDialog.showDeleteVehicle(
       context,
-      title: 'Delete Vehicle',
-      message:
-          'Are you sure you want to delete vehicle "${vehicle.vehicleNumber}" (${vehicle.company} - ${vehicle.brand} ${vehicle.model})? This action will permanently remove it from the system.',
-      confirmLabel: 'Delete',
-      isDestructive: true,
+      vehicleNumber: vehicle.vehicleNumber,
+      onConfirmDelete: () => ref
+          .read(vehicleFormNotifierProvider.notifier)
+          .deleteVehicle(vehicle.id),
     );
 
-    if (confirmed == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 1),
-          content: Row(
-            children: [
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Text('Deleting vehicle ${vehicle.vehicleNumber}...'),
-            ],
-          ),
-        ),
+    if (!context.mounted || result == null) return;
+
+    if (result == true) {
+      AppToast.showSuccess(
+        context,
+        'Vehicle ${vehicle.vehicleNumber} deleted successfully.',
       );
-
-      final success = await ref
-          .read(vehicleFormNotifierProvider.notifier)
-          .deleteVehicle(vehicle.id);
-
-      if (mounted) {
-        if (success) {
-          AppToast.showSuccess(
-            context,
-            'Vehicle ${vehicle.vehicleNumber} deleted successfully.',
-          );
-          // Remove from UI only after backend success
-          _pagingController.refresh();
-        } else {
-          final error = ref.read(vehicleFormNotifierProvider).errorMessage ??
-              'Failed to delete vehicle.';
-          AppToast.showError(context, error);
-        }
+    } else {
+      final error = ref.read(vehicleFormNotifierProvider).errorMessage;
+      if (error != null && error.isNotEmpty) {
+        AppToast.showError(context, error);
       }
     }
   }
 
   @override
-  void dispose() {
-    _pagingController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final filterState = ref.watch(vehicleFilterProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final listState = ref.watch(vehicleListProvider);
+    final listNotifier = ref.read(vehicleListProvider.notifier);
     final width = MediaQuery.of(context).size.width;
-    final isDesktop = width >= 768;
+    final isDesktop = width >= 850;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -132,121 +68,175 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
           // Screen Header
           PageHeader(
             title: 'Vehicle Fleet',
-            subtitle: 'Overview of all registered company vehicles, statuses, and fleet assignments.',
+            subtitle:
+                'Overview of all registered company vehicles, technical specifications, and operational assignments.',
             breadcrumbs: const [
-              BreadcrumbItem(label: 'Fleet Management'),
-              BreadcrumbItem(label: 'Vehicles'),
+              BreadcrumbItem(label: 'Stark Group VMS'),
+              BreadcrumbItem(label: 'Vehicle Fleet'),
             ],
             actions: [
               AppButton(
-                label: 'Register Vehicle',
+                label: 'Add Vehicle',
                 icon: Icons.add_rounded,
                 onPressed: () => context.go(AppRoutes.addVehicle),
               ),
             ],
           ),
 
-          // Filters & Search Bar
+          const SizedBox(height: 12),
+
+          // Search and Filters Bar
           VehicleFilterBar(
-            searchQuery: filterState.searchQuery,
-            selectedStatus: filterState.statusFilter,
-            onSearchChanged: (query) {
-              ref.read(vehicleFilterProvider.notifier).setSearchQuery(query);
-              _onFilterChanged();
-            },
-            onStatusChanged: (status) {
-              ref.read(vehicleFilterProvider.notifier).setStatusFilter(status);
-              _onFilterChanged();
-            },
-            onRefresh: () => _pagingController.refresh(),
-            onClearFilters: () {
-              ref.read(vehicleFilterProvider.notifier).resetFilters();
-              _onFilterChanged();
-            },
+            searchQuery: listState.searchQuery,
+            selectedStatus: listState.statusFilter,
+            selectedVehicleType: listState.vehicleTypeFilter,
+            selectedFuelType: listState.fuelTypeFilter,
+            onSearchChanged: listNotifier.onSearchChanged,
+            onClearSearch: listNotifier.clearSearch,
+            onStatusChanged: listNotifier.setStatusFilter,
+            onVehicleTypeChanged: listNotifier.setVehicleTypeFilter,
+            onFuelTypeChanged: listNotifier.setFuelTypeFilter,
+            onRefresh: listNotifier.refresh,
+            onClearFilters: listNotifier.resetFilters,
           ),
+
           const SizedBox(height: 20),
 
-          // Infinite Scroll Paged Content with 6.0.0 PagingListener
-          PagingListener<int, VehicleEntity>(
-            controller: _pagingController,
-            builder: (context, state, fetchNextPage) => PagedListView<int, VehicleEntity>(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              state: state,
-              fetchNextPage: fetchNextPage,
-              builderDelegate: PagedChildBuilderDelegate<VehicleEntity>(
-                itemBuilder: (context, vehicle, index) {
-                  if (!isDesktop) {
-                    return VehicleMobileCard(
-                      vehicle: vehicle,
-                      onEdit: () => _navigateToEdit(vehicle),
-                      onDelete: () => _handleDelete(vehicle),
-                    );
-                  }
+          // Main Content Area
+          _buildContent(context, ref, listState, listNotifier, isDesktop),
+        ],
+      ),
+    );
+  }
 
-                  // Render table for desktop on first index with all collected items
-                  final isFirst = index == 0;
-                  final allItems = state.items;
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    VehicleListState state,
+    VehicleListNotifier notifier,
+    bool isDesktop,
+  ) {
+    // 1. Initial load skeleton
+    if (state.isInitialLoading) {
+      return const VehicleTableSkeleton();
+    }
 
-                  if (isFirst) {
-                    return VehicleTable(
-                      vehicles: allItems,
-                      onEdit: _navigateToEdit,
-                      onDelete: _handleDelete,
-                    );
-                  }
+    // 2. Full error view when no cached items exist
+    if (state.errorMessage != null && state.vehicles.isEmpty) {
+      return ErrorStateView(
+        title: 'Failed to load vehicles',
+        message: state.errorMessage!,
+        onRetry: notifier.refresh,
+      );
+    }
 
-                  return const SizedBox.shrink();
-                },
-                firstPageProgressIndicatorBuilder: (_) => const VehicleTableSkeleton(),
-                newPageProgressIndicatorBuilder: (_) => const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+    // 3. Empty state (no vehicles or no search/filter matches)
+    if (state.hasLoadedOnce && state.vehicles.isEmpty) {
+      return EmptyStateView(
+        icon: Icons.directions_car_outlined,
+        title: 'No vehicles found',
+        description: state.hasActiveFilters
+            ? 'No vehicle records match your search or filter criteria. Try clearing filters.'
+            : 'Your fleet inventory is empty. Click "Add Vehicle" to register the first vehicle.',
+        actionLabel: state.hasActiveFilters ? 'Clear Filters' : 'Add Vehicle',
+        onAction: state.hasActiveFilters
+            ? notifier.resetFilters
+            : () => context.go(AppRoutes.addVehicle),
+      );
+    }
+
+    // 4. Data table / mobile cards + Pagination footer
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Inline error banner if refresh/page change failed while keeping existing data visible
+        if (state.errorMessage != null) ...[
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.destructiveBackground,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.destructiveBorder),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppColors.red,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    state.errorMessage!,
+                    style: const TextStyle(
+                      color: AppColors.red,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                noItemsFoundIndicatorBuilder: (_) => EmptyStateView(
-                  icon: Icons.directions_car_outlined,
-                  title: 'No vehicles found',
-                  description: filterState.searchQuery.isNotEmpty || filterState.statusFilter != null
-                      ? 'No fleet records match your current filter criteria. Try adjusting or clearing filters.'
-                      : 'Your vehicle fleet is currently empty. Register your first vehicle to get started.',
-                  actionLabel: filterState.searchQuery.isNotEmpty || filterState.statusFilter != null
-                      ? 'Clear Filters'
-                      : 'Register Vehicle',
-                  onAction: filterState.searchQuery.isNotEmpty || filterState.statusFilter != null
-                      ? () {
-                          ref.read(vehicleFilterProvider.notifier).resetFilters();
-                          _onFilterChanged();
-                        }
-                      : () => context.go(AppRoutes.addVehicle),
+                TextButton(
+                  onPressed: notifier.refresh,
+                  child: const Text('Retry'),
                 ),
-                firstPageErrorIndicatorBuilder: (context, error) => ErrorStateView(
-                  title: 'Failed to load vehicles',
-                  message: error.toString(),
-                  onRetry: () => _pagingController.refresh(),
-                ),
-                newPageErrorIndicatorBuilder: (context, error) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: AppButton(
-                      label: 'Retry loading more',
-                      variant: AppButtonVariant.outline,
-                      size: AppButtonSize.sm,
-                      icon: Icons.refresh,
-                      onPressed: () => _pagingController.fetchNextPage(),
-                    ),
-                  ),
-                ),
-              ),
+              ],
             ),
           ),
         ],
-      ),
+
+        // Subtle controlled progress bar during page transitions / debounced search
+        if (state.isPageLoading)
+          const ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+            child: LinearProgressIndicator(
+              minHeight: 3,
+              backgroundColor: AppColors.surfaceSecondary,
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(AppColors.corporateBlue),
+            ),
+          ),
+
+        // Vehicle Data View (Responsive Table vs Mobile Cards)
+        AnimatedOpacity(
+          duration: const Duration(milliseconds: 150),
+          opacity: state.isPageLoading ? 0.65 : 1.0,
+          child: isDesktop
+              ? VehicleTable(
+                  vehicles: state.vehicles,
+                  onEdit: (v) => _navigateToEdit(context, v),
+                  onDelete: (v) => _handleDelete(context, ref, v),
+                )
+              : Column(
+                  children: state.vehicles
+                      .map(
+                        (v) => VehicleMobileCard(
+                          vehicle: v,
+                          onEdit: () => _navigateToEdit(context, v),
+                          onDelete: () => _handleDelete(context, ref, v),
+                        ),
+                      )
+                      .toList(),
+                ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Numbered Page-Based Pagination Footer
+        VehiclePaginationBar(
+          startItem: state.startItem,
+          endItem: state.endItem,
+          totalElements: state.totalElements,
+          displayPage: state.displayPage,
+          displayTotalPages: state.displayTotalPages,
+          canGoPrevious: state.canGoPrevious,
+          canGoNext: state.canGoNext,
+          isLoading: state.isPageLoading,
+          onPrevious: notifier.previousPage,
+          onNext: notifier.nextPage,
+        ),
+      ],
     );
   }
 }

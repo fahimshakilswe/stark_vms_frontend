@@ -9,19 +9,29 @@ class UpdateVehicleUseCase {
   Future<VehicleEntity> call({
     required int id,
     required String vehicleNumber,
-    required String company,
-    required String type,
+    required String vehicleType,
     required String brand,
     required String model,
+    int? manufacturingYear,
+    String? color,
+    required String fuelType,
+    int? seatingCapacity,
+    String? driverName,
+    String? driverPhone,
     required String status,
   }) {
     return _repository.updateVehicle(
       id: id,
       vehicleNumber: vehicleNumber,
-      company: company,
-      type: type,
+      vehicleType: vehicleType,
       brand: brand,
       model: model,
+      manufacturingYear: manufacturingYear,
+      color: color,
+      fuelType: fuelType,
+      seatingCapacity: seatingCapacity,
+      driverName: driverName,
+      driverPhone: driverPhone,
       status: status,
     );
   }

@@ -5,18 +5,28 @@ part 'vehicle_request_model.g.dart';
 @JsonSerializable()
 class VehicleRequestModel {
   final String vehicleNumber;
-  final String company;
-  final String type;
+  final String vehicleType;
   final String brand;
   final String model;
+  final int? manufacturingYear;
+  final String? color;
+  final String fuelType;
+  final int? seatingCapacity;
+  final String? driverName;
+  final String? driverPhone;
   final String status;
 
   const VehicleRequestModel({
     required this.vehicleNumber,
-    required this.company,
-    required this.type,
+    required this.vehicleType,
     required this.brand,
     required this.model,
+    this.manufacturingYear,
+    this.color,
+    required this.fuelType,
+    this.seatingCapacity,
+    this.driverName,
+    this.driverPhone,
     required this.status,
   });
 

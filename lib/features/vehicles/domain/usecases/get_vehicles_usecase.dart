@@ -12,10 +12,10 @@ class GetVehiclesUseCase {
     String sortBy = 'createdAt',
     String sortDir = 'desc',
     String? search,
-    String? company,
-    String? type,
+    String? vehicleType,
     String? brand,
     String? model,
+    String? fuelType,
     String? status,
   }) {
     return _repository.getVehicles(
@@ -24,10 +24,10 @@ class GetVehiclesUseCase {
       sortBy: sortBy,
       sortDir: sortDir,
       search: search,
-      company: company,
-      type: type,
+      vehicleType: vehicleType,
       brand: brand,
       model: model,
+      fuelType: fuelType,
       status: status,
     );
   }

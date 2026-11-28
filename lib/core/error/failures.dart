@@ -72,7 +72,7 @@ class NotFoundFailure extends Failure {
 
 class NetworkFailure extends Failure {
   const NetworkFailure({
-    super.message = 'Unable to connect to server. Please check your network.',
+    super.message = 'Unable to connect to the server. Please check your connection and try again.',
     super.statusCode,
   });
 }

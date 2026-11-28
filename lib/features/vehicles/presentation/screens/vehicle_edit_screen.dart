@@ -7,6 +7,7 @@ import 'package:stark_vms_frontend/core/utils/toast_utils.dart';
 import 'package:stark_vms_frontend/core/widgets/error_state_view.dart';
 import 'package:stark_vms_frontend/core/widgets/page_header.dart';
 import 'package:stark_vms_frontend/features/vehicles/domain/entities/vehicle_entity.dart';
+import 'package:stark_vms_frontend/features/vehicles/domain/enums/vehicle_enums.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/providers/vehicle_providers.dart';
 import 'package:stark_vms_frontend/features/vehicles/presentation/widgets/vehicle_form.dart';
 
@@ -35,10 +36,15 @@ class _VehicleEditScreenState extends ConsumerState<VehicleEditScreen> {
     final success = await ref.read(vehicleFormNotifierProvider.notifier).updateVehicle(
           id: widget.vehicleId,
           vehicleNumber: data.vehicleNumber,
-          company: data.company,
-          type: data.type,
+          vehicleType: data.vehicleType,
           brand: data.brand,
           model: data.model,
+          manufacturingYear: data.manufacturingYear,
+          color: data.color,
+          fuelType: data.fuelType,
+          seatingCapacity: data.seatingCapacity,
+          driverName: data.driverName,
+          driverPhone: data.driverPhone,
           status: data.status,
         );
 
@@ -58,14 +64,14 @@ class _VehicleEditScreenState extends ConsumerState<VehicleEditScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           PageHeader(
-            title: 'Edit Vehicle #${widget.vehicleId}',
+            title: 'Edit Vehicle ${widget.vehicleId}',
             subtitle: 'Update fleet specifications and operational status.',
             breadcrumbs: [
               BreadcrumbItem(
                 label: 'Vehicles',
                 onTap: () => context.go(AppRoutes.vehicles),
               ),
-              BreadcrumbItem(label: 'Edit #${widget.vehicleId}'),
+              BreadcrumbItem(label: 'Edit ${widget.vehicleId}'),
             ],
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
@@ -74,19 +80,26 @@ class _VehicleEditScreenState extends ConsumerState<VehicleEditScreen> {
             ),
           ),
 
-          // Loading skeleton state
-          if (formState.isLoading)
+          // Loading skeleton state (also covers initial frame before loadVehicle starts or stale ID)
+          if (formState.isLoading ||
+              (formState.vehicle == null && formState.errorMessage == null) ||
+              (formState.vehicle != null && formState.vehicle!.id != widget.vehicleId))
             Skeletonizer(
               enabled: true,
               child: VehicleForm(
                 initialVehicle: VehicleEntity(
                   id: widget.vehicleId,
-                  vehicleNumber: 'DHAKA-METRO-GA-1234',
-                  company: 'Acme Logistics',
-                  type: 'Sedan',
+                  vehicleNumber: 'DHA-METRO-GA-11-1001',
+                  vehicleType: VehicleType.CAR.name,
                   brand: 'Toyota',
-                  model: 'Corolla',
-                  status: 'ACTIVE',
+                  model: 'Corolla Altis',
+                  manufacturingYear: 2022,
+                  color: 'Silver',
+                  fuelType: FuelType.OCTANE.name,
+                  seatingCapacity: 5,
+                  driverName: 'Rahim Uddin',
+                  driverPhone: '+8801711000001',
+                  status: VehicleStatus.AVAILABLE.name,
                 ),
                 onSubmit: (_) {},
                 onCancel: () => context.go(AppRoutes.vehicles),
@@ -101,12 +114,13 @@ class _VehicleEditScreenState extends ConsumerState<VehicleEditScreen> {
                   .read(vehicleFormNotifierProvider.notifier)
                   .loadVehicle(widget.vehicleId),
             )
-          // Form with loaded vehicle data
-          else if (formState.vehicle != null)
+          // Prepopulated form for edit
+          else
             VehicleForm(
               initialVehicle: formState.vehicle,
               isSaving: formState.isSaving,
               errorMessage: formState.errorMessage,
+              vehicleNumberError: formState.vehicleNumberError,
               onSubmit: _handleSubmit,
               onCancel: () => context.go(AppRoutes.vehicles),
             ),

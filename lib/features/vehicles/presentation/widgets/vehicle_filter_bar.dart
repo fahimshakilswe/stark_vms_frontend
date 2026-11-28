@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:stark_vms_frontend/core/theme/app_colors.dart';
-import 'package:stark_vms_frontend/core/widgets/app_button.dart';
+import 'package:stark_vms_frontend/features/vehicles/domain/enums/vehicle_enums.dart';
 
 class VehicleFilterBar extends StatefulWidget {
   final String searchQuery;
   final String? selectedStatus;
+  final String? selectedVehicleType;
+  final String? selectedFuelType;
   final ValueChanged<String> onSearchChanged;
+  final VoidCallback onClearSearch;
   final ValueChanged<String?> onStatusChanged;
+  final ValueChanged<String?> onVehicleTypeChanged;
+  final ValueChanged<String?> onFuelTypeChanged;
   final VoidCallback onRefresh;
   final VoidCallback onClearFilters;
 
@@ -14,8 +19,13 @@ class VehicleFilterBar extends StatefulWidget {
     super.key,
     required this.searchQuery,
     required this.selectedStatus,
+    this.selectedVehicleType,
+    this.selectedFuelType,
     required this.onSearchChanged,
+    required this.onClearSearch,
     required this.onStatusChanged,
+    required this.onVehicleTypeChanged,
+    required this.onFuelTypeChanged,
     required this.onRefresh,
     required this.onClearFilters,
   });
@@ -26,174 +36,261 @@ class VehicleFilterBar extends StatefulWidget {
 
 class _VehicleFilterBarState extends State<VehicleFilterBar> {
   late final TextEditingController _searchController;
-
-  static const List<String> statusOptions = [
-    'ALL',
-    'ACTIVE',
-    'MAINTENANCE',
-    'INACTIVE',
-    'RETIRED',
-  ];
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.searchQuery);
+    _searchController.addListener(_onControllerChange);
+  }
+
+  void _onControllerChange() {
+    // Rebuild only to toggle clear button visibility cleanly
+    if (mounted) setState(() {});
   }
 
   @override
   void didUpdateWidget(covariant VehicleFilterBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.searchQuery != _searchController.text) {
-      _searchController.text = widget.searchQuery;
+    // Sync controller when cleared externally (e.g. Reset Filters / Dashboard click)
+    if (widget.searchQuery != oldWidget.searchQuery &&
+        widget.searchQuery.isEmpty &&
+        _searchController.text.isNotEmpty) {
+      _searchController.clear();
     }
   }
 
   @override
   void dispose() {
+    _searchController.removeListener(_onControllerChange);
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final hasActiveFilter = widget.searchQuery.isNotEmpty ||
-        (widget.selectedStatus != null && widget.selectedStatus != 'ALL');
+        _searchController.text.isNotEmpty ||
+        (widget.selectedStatus != null && widget.selectedStatus != 'ALL') ||
+        (widget.selectedVehicleType != null &&
+            widget.selectedVehicleType != 'ALL') ||
+        (widget.selectedFuelType != null && widget.selectedFuelType != 'ALL');
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.border),
       ),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        alignment: WrapAlignment.spaceBetween,
-        children: [
-          // Search Box
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 320, minWidth: 220),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 820;
+
+          final searchBox = ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isWide ? 380 : double.infinity,
+              minWidth: 240,
+            ),
             child: SizedBox(
-              height: 38,
+              height: 40,
               child: TextField(
                 controller: _searchController,
+                focusNode: _searchFocusNode,
                 onChanged: widget.onSearchChanged,
-                style: const TextStyle(fontSize: 13.5, color: AppColors.textPrimary),
+                textInputAction: TextInputAction.search,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  color: AppColors.charcoal,
+                ),
                 decoration: InputDecoration(
-                  hintText: 'Search vehicle number...',
-                  hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                  hintText:
+                      'Search by vehicle number, brand, model or driver...',
+                  hintStyle: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textMuted,
+                  ),
                   prefixIcon: const Icon(
                     Icons.search_rounded,
                     size: 18,
-                    color: AppColors.textSecondary,
+                    color: AppColors.deepBlue,
                   ),
-                  prefixIconConstraints: const BoxConstraints(minWidth: 36),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 38),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear, size: 16),
+                          icon: const Icon(
+                            Icons.clear_rounded,
+                            size: 17,
+                            color: AppColors.textSecondary,
+                          ),
+                          tooltip: 'Clear search',
                           onPressed: () {
                             _searchController.clear();
-                            widget.onSearchChanged('');
+                            widget.onClearSearch();
                           },
                         )
                       : null,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(color: AppColors.borderFocus, width: 1.5),
-                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
             ),
-          ),
+          );
 
-          // Status Filter Buttons / Dropdown
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          final filterControls = Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Text(
-                'Status: ',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
+              // Status Filter Dropdown
+              _buildDropdown(
+                value: widget.selectedStatus ?? 'ALL',
+                items: [
+                  const DropdownMenuItem(
+                    value: 'ALL',
+                    child: Text('All Statuses'),
+                  ),
+                  ...VehicleStatus.values.map(
+                    (s) => DropdownMenuItem(
+                      value: s.name,
+                      child: Text(s.displayName),
+                    ),
+                  ),
+                ],
+                onChanged: (val) =>
+                    widget.onStatusChanged(val == 'ALL' ? null : val),
               ),
-              const SizedBox(width: 8),
+
+              // Vehicle Type Filter Dropdown
+              _buildDropdown(
+                value: widget.selectedVehicleType ?? 'ALL',
+                items: [
+                  const DropdownMenuItem(
+                    value: 'ALL',
+                    child: Text('All Types'),
+                  ),
+                  ...VehicleType.values.map(
+                    (t) => DropdownMenuItem(
+                      value: t.name,
+                      child: Text(t.displayName),
+                    ),
+                  ),
+                ],
+                onChanged: (val) =>
+                    widget.onVehicleTypeChanged(val == 'ALL' ? null : val),
+              ),
+
+              // Fuel Type Filter Dropdown
+              _buildDropdown(
+                value: widget.selectedFuelType ?? 'ALL',
+                items: [
+                  const DropdownMenuItem(
+                    value: 'ALL',
+                    child: Text('All Fuels'),
+                  ),
+                  ...FuelType.values.map(
+                    (f) => DropdownMenuItem(
+                      value: f.name,
+                      child: Text(f.displayName),
+                    ),
+                  ),
+                ],
+                onChanged: (val) =>
+                    widget.onFuelTypeChanged(val == 'ALL' ? null : val),
+              ),
+
+              // Refresh Button
               Container(
-                height: 38,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                height: 40,
+                width: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(6),
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.border),
                 ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: widget.selectedStatus ?? 'ALL',
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 18,
-                      color: AppColors.textSecondary,
-                    ),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
-                    ),
-                    items: statusOptions.map((status) {
-                      return DropdownMenuItem<String>(
-                        value: status,
-                        child: Text(status),
-                      );
-                    }).toList(),
-                    onChanged: widget.onStatusChanged,
-                  ),
+                child: IconButton(
+                  icon: const Icon(Icons.refresh_rounded, size: 19),
+                  tooltip: 'Refresh list',
+                  color: AppColors.deepBlue,
+                  onPressed: widget.onRefresh,
                 ),
               ),
-            ],
-          ),
 
-          // Action buttons: Clear & Refresh
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (hasActiveFilter) ...[
-                AppButton(
-                  label: 'Clear Filters',
-                  variant: AppButtonVariant.ghost,
-                  size: AppButtonSize.sm,
-                  icon: Icons.filter_alt_off_outlined,
+              // Clear All Filters
+              if (hasActiveFilter)
+                TextButton.icon(
                   onPressed: () {
                     _searchController.clear();
                     widget.onClearFilters();
                   },
+                  icon: const Icon(Icons.filter_alt_off_rounded, size: 16),
+                  label: const Text('Clear'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.red,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 8),
-              ],
-              AppButton(
-                label: 'Refresh',
-                variant: AppButtonVariant.outline,
-                size: AppButtonSize.sm,
-                icon: Icons.refresh_rounded,
-                onPressed: widget.onRefresh,
-              ),
             ],
+          );
+
+          if (isWide) {
+            return Row(
+              children: [
+                Expanded(child: searchBox),
+                const SizedBox(width: 12),
+                filterControls,
+              ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              searchBox,
+              const SizedBox(height: 12),
+              filterControls,
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String value,
+    required List<DropdownMenuItem<String>> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: items.any((i) => i.value == value) ? value : 'ALL',
+          items: items,
+          onChanged: onChanged,
+          icon: const Icon(
+            Icons.arrow_drop_down,
+            color: AppColors.textSecondary,
+            size: 20,
           ),
-        ],
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.charcoal,
+            fontWeight: FontWeight.w500,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     );
   }

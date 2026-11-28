@@ -19,249 +19,240 @@ class VehicleTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.border),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          // Table Header
-          Container(
-            color: AppColors.surfaceSecondary,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: const Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    'VEHICLE NUMBER',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth > 1250 ? constraints.maxWidth : 1250),
+              child: DataTable(
+                headingRowHeight: 44,
+                dataRowMinHeight: 52,
+                dataRowMaxHeight: 58,
+                columnSpacing: 16,
+                horizontalMargin: 20,
+                headingRowColor: WidgetStateProperty.all(AppColors.surfaceSecondary),
+                dividerThickness: 1,
+                border: const TableBorder(
+                  horizontalInside: BorderSide(color: AppColors.border, width: 1),
                 ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    'COMPANY',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'TYPE',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    'BRAND & MODEL',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'STATUS',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 90,
-                  child: Text(
-                    'ACTIONS',
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-              ],
+                columns: const [
+                  DataColumn(label: _HeaderCell('VEHICLE NUMBER')),
+                  DataColumn(label: _HeaderCell('TYPE')),
+                  DataColumn(label: _HeaderCell('BRAND')),
+                  DataColumn(label: _HeaderCell('MODEL')),
+                  DataColumn(label: _HeaderCell('YEAR')),
+                  DataColumn(label: _HeaderCell('COLOR')),
+                  DataColumn(label: _HeaderCell('FUEL TYPE')),
+                  DataColumn(label: _HeaderCell('SEATS')),
+                  DataColumn(label: _HeaderCell('DRIVER NAME')),
+                  DataColumn(label: _HeaderCell('DRIVER PHONE')),
+                  DataColumn(label: _HeaderCell('STATUS')),
+                  DataColumn(label: _HeaderCell('ACTIONS', alignRight: true)),
+                ],
+                rows: vehicles.map((v) {
+                  return DataRow(
+                    cells: [
+                      // Vehicle Number
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F1F8),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: const Color(0xFFB3D4EE)),
+                          ),
+                          child: Text(
+                            v.vehicleNumber,
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12.5,
+                              color: AppColors.deepBlue,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Vehicle Type
+                      DataCell(
+                        Text(
+                          v.vehicleType,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.charcoal,
+                          ),
+                        ),
+                      ),
+                      // Brand
+                      DataCell(
+                        Text(
+                          v.brand,
+                          style: const TextStyle(fontSize: 13, color: AppColors.charcoal),
+                        ),
+                      ),
+                      // Model
+                      DataCell(
+                        Text(
+                          v.model,
+                          style: const TextStyle(fontSize: 13, color: AppColors.charcoal),
+                        ),
+                      ),
+                      // Manufacturing Year
+                      DataCell(
+                        Text(
+                          v.manufacturingYear != null ? v.manufacturingYear.toString() : '—',
+                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        ),
+                      ),
+                      // Color
+                      DataCell(
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (v.color != null && v.color!.trim().isNotEmpty) ...[
+                              Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  color: _parseColor(v.color!),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            Text(
+                              v.color != null && v.color!.trim().isNotEmpty ? v.color! : '—',
+                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Fuel Type
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceSecondary,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            v.fuelType,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Seating Capacity
+                      DataCell(
+                        Text(
+                          v.seatingCapacity != null ? '${v.seatingCapacity} seats' : '—',
+                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        ),
+                      ),
+                      // Driver Name
+                      DataCell(
+                        Text(
+                          v.driverName != null && v.driverName!.trim().isNotEmpty
+                              ? v.driverName!
+                              : 'Unassigned',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: v.driverName != null && v.driverName!.trim().isNotEmpty
+                                ? AppColors.charcoal
+                                : AppColors.textMuted,
+                            fontStyle: v.driverName != null && v.driverName!.trim().isNotEmpty
+                                ? FontStyle.normal
+                                : FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                      // Driver Phone
+                      DataCell(
+                        Text(
+                          v.driverPhone != null && v.driverPhone!.trim().isNotEmpty
+                              ? v.driverPhone!
+                              : '—',
+                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        ),
+                      ),
+                      // Status
+                      DataCell(
+                        AppBadge.fromStatus(v.status),
+                      ),
+                      // Actions
+                      DataCell(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined, size: 18),
+                              tooltip: 'Edit vehicle',
+                              color: AppColors.corporateBlue,
+                              hoverColor: AppColors.corporateBlue.withValues(alpha: 0.1),
+                              onPressed: () => onEdit(v),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                              tooltip: 'Delete vehicle',
+                              color: AppColors.red,
+                              hoverColor: AppColors.red.withValues(alpha: 0.1),
+                              onPressed: () => onDelete(v),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-          const Divider(height: 1, color: AppColors.border),
-
-          // Table Rows
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: vehicles.length,
-            separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.border),
-            itemBuilder: (context, index) {
-              final vehicle = vehicles[index];
-              return _VehicleTableRow(
-                vehicle: vehicle,
-                onEdit: () => onEdit(vehicle),
-                onDelete: () => onDelete(vehicle),
-              );
-            },
-          ),
-        ],
+          );
+        },
       ),
     );
   }
+
+  Color _parseColor(String colorName) {
+    final lower = colorName.toLowerCase().trim();
+    if (lower.contains('red')) return Colors.red;
+    if (lower.contains('blue')) return Colors.blue;
+    if (lower.contains('green')) return Colors.green;
+    if (lower.contains('black')) return Colors.black;
+    if (lower.contains('white')) return Colors.white;
+    if (lower.contains('silver') || lower.contains('grey') || lower.contains('gray')) return Colors.grey;
+    if (lower.contains('yellow')) return Colors.amber;
+    if (lower.contains('orange')) return Colors.orange;
+    return AppColors.corporateBlue;
+  }
 }
 
-class _VehicleTableRow extends StatefulWidget {
-  final VehicleEntity vehicle;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+class _HeaderCell extends StatelessWidget {
+  final String label;
+  final bool alignRight;
 
-  const _VehicleTableRow({
-    required this.vehicle,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  State<_VehicleTableRow> createState() => _VehicleTableRowState();
-}
-
-class _VehicleTableRowState extends State<_VehicleTableRow> {
-  bool _isHovered = false;
+  const _HeaderCell(this.label, {this.alignRight = false});
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: Container(
-        color: _isHovered ? AppColors.surfaceSecondary.withValues(alpha: 0.5) : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Row(
-          children: [
-            // Vehicle Number (Highlighted with badge container)
-            Expanded(
-              flex: 3,
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: const Color(0xFFCBD5E1)),
-                    ),
-                    child: Text(
-                      widget.vehicle.vehicleNumber,
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Company
-            Expanded(
-              flex: 3,
-              child: Text(
-                widget.vehicle.company,
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-
-            // Type
-            Expanded(
-              flex: 2,
-              child: Text(
-                widget.vehicle.type,
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-
-            // Brand & Model
-            Expanded(
-              flex: 3,
-              child: Text(
-                '${widget.vehicle.brand} ${widget.vehicle.model}',
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-
-            // Status Badge
-            Expanded(
-              flex: 2,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: AppBadge.fromStatus(widget.vehicle.status),
-              ),
-            ),
-
-            // Actions (Edit & Delete)
-            SizedBox(
-              width: 90,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.edit_outlined,
-                      size: 18,
-                      color: AppColors.textSecondary,
-                    ),
-                    tooltip: 'Edit Vehicle',
-                    hoverColor: AppColors.accent.withValues(alpha: 0.1),
-                    onPressed: widget.onEdit,
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline_rounded,
-                      size: 18,
-                      color: AppColors.destructive,
-                    ),
-                    tooltip: 'Delete Vehicle',
-                    hoverColor: AppColors.destructive.withValues(alpha: 0.1),
-                    onPressed: widget.onDelete,
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return Container(
+      alignment: alignRight ? Alignment.centerRight : Alignment.centerLeft,
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          color: AppColors.deepBlue,
+          letterSpacing: 0.5,
         ),
       ),
     );

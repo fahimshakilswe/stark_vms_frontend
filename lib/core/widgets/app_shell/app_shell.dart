@@ -25,12 +25,14 @@ class _AppShellState extends ConsumerState<AppShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   String _getPageTitle(String location) {
-    if (location == AppRoutes.vehicles) {
-      return 'Vehicle Management';
+    if (location == AppRoutes.dashboard) {
+      return 'Fleet Dashboard';
+    } else if (location == AppRoutes.vehicles) {
+      return 'Vehicle Fleet Management';
     } else if (location == AppRoutes.addVehicle) {
       return 'Register New Vehicle';
     } else if (location.startsWith('/vehicles/edit')) {
-      return 'Edit Vehicle';
+      return 'Edit Vehicle Details';
     }
     return EnvConfig.appName;
   }

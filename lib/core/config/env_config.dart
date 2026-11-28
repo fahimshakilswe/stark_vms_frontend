@@ -19,5 +19,5 @@ class EnvConfig {
   static const int defaultPageSize = 10;
 
   /// Application Name.
-  static const String appName = 'Stark VMS';
+  static const String appName = 'Stark Group VMS';
 }

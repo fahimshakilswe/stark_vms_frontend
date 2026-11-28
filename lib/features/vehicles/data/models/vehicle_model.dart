@@ -7,10 +7,15 @@ part 'vehicle_model.g.dart';
 class VehicleModel {
   final int id;
   final String vehicleNumber;
-  final String company;
-  final String type;
+  final String vehicleType;
   final String brand;
   final String model;
+  final int? manufacturingYear;
+  final String? color;
+  final String fuelType;
+  final int? seatingCapacity;
+  final String? driverName;
+  final String? driverPhone;
   final String status;
   final String? createdAt;
   final String? updatedAt;
@@ -18,10 +23,15 @@ class VehicleModel {
   const VehicleModel({
     required this.id,
     required this.vehicleNumber,
-    required this.company,
-    required this.type,
+    required this.vehicleType,
     required this.brand,
     required this.model,
+    this.manufacturingYear,
+    this.color,
+    required this.fuelType,
+    this.seatingCapacity,
+    this.driverName,
+    this.driverPhone,
     required this.status,
     this.createdAt,
     this.updatedAt,
@@ -36,10 +46,15 @@ class VehicleModel {
     return VehicleEntity(
       id: id,
       vehicleNumber: vehicleNumber,
-      company: company,
-      type: type,
+      vehicleType: vehicleType,
       brand: brand,
       model: model,
+      manufacturingYear: manufacturingYear,
+      color: color,
+      fuelType: fuelType,
+      seatingCapacity: seatingCapacity,
+      driverName: driverName,
+      driverPhone: driverPhone,
       status: status,
       createdAt: createdAt != null ? DateTime.tryParse(createdAt!) : null,
       updatedAt: updatedAt != null ? DateTime.tryParse(updatedAt!) : null,
@@ -50,10 +65,15 @@ class VehicleModel {
     return VehicleModel(
       id: entity.id,
       vehicleNumber: entity.vehicleNumber,
-      company: entity.company,
-      type: entity.type,
+      vehicleType: entity.vehicleType,
       brand: entity.brand,
       model: entity.model,
+      manufacturingYear: entity.manufacturingYear,
+      color: entity.color,
+      fuelType: entity.fuelType,
+      seatingCapacity: entity.seatingCapacity,
+      driverName: entity.driverName,
+      driverPhone: entity.driverPhone,
       status: entity.status,
       createdAt: entity.createdAt?.toIso8601String(),
       updatedAt: entity.updatedAt?.toIso8601String(),

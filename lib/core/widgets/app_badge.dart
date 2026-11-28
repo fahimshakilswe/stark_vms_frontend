@@ -28,22 +28,31 @@ class AppBadge extends StatelessWidget {
   /// Factory helper that automatically picks color/variant according to vehicle status.
   factory AppBadge.fromStatus(String status) {
     BadgeVariant variant;
-    switch (status.toUpperCase()) {
-      case 'ACTIVE':
+    String displayLabel = status;
+    final clean = status.trim().toUpperCase();
+
+    switch (clean) {
+      case 'AVAILABLE':
         variant = BadgeVariant.success;
+        displayLabel = 'Available';
         break;
+      case 'ACTIVE':
+        variant = BadgeVariant.defaultVariant;
+        displayLabel = 'Active';
+        break;
+      case 'MAINTENCE':
       case 'MAINTENANCE':
         variant = BadgeVariant.warning;
-        break;
-      case 'RETIRED':
-        variant = BadgeVariant.destructive;
+        displayLabel = 'Maintenance';
         break;
       case 'INACTIVE':
       default:
         variant = BadgeVariant.secondary;
+        displayLabel = 'Inactive';
+        break;
     }
     return AppBadge(
-      label: status.toUpperCase(),
+      label: displayLabel,
       variant: variant,
       showDot: true,
     );
@@ -82,9 +91,9 @@ class AppBadge extends StatelessWidget {
         border = AppColors.border;
         break;
       case BadgeVariant.defaultVariant:
-        bg = AppColors.primary;
-        fg = AppColors.primaryForeground;
-        border = AppColors.primary;
+        bg = const Color(0xFFE8F1F8);
+        fg = AppColors.deepBlue;
+        border = const Color(0xFFB3D4EE);
         break;
     }
 

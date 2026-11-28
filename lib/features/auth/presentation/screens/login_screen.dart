@@ -41,7 +41,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
 
     if (success && mounted) {
-      context.go(AppRoutes.vehicles);
+      context.go(AppRoutes.dashboard);
     }
   }
 

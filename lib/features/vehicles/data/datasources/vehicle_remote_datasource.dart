@@ -12,10 +12,10 @@ abstract class VehicleRemoteDataSource {
     String sortBy = 'createdAt',
     String sortDir = 'desc',
     String? search,
-    String? company,
-    String? type,
+    String? vehicleType,
     String? brand,
     String? model,
+    String? fuelType,
     String? status,
   });
 
@@ -30,6 +30,29 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
 
   VehicleRemoteDataSourceImpl(this._apiService);
 
+  String? _cleanParam(String? value) {
+    if (value == null) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  /// Compatibility mapping for older Spring Boot query parameter enum binding
+  /// when `@RequestParam VehicleStatus status` expects PascalCase/legacy names.
+  String? _legacyStatusAlias(String status) {
+    switch (status.trim().toUpperCase()) {
+      case 'AVAILABLE':
+        return 'Available';
+      case 'ACTIVE':
+        return 'Active';
+      case 'INACTIVE':
+        return 'Inactive';
+      case 'MAINTENANCE':
+        return 'Maintence';
+      default:
+        return null;
+    }
+  }
+
   @override
   Future<VehiclePageResponseModel> getVehicles({
     int page = 0,
@@ -37,24 +60,31 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
     String sortBy = 'createdAt',
     String sortDir = 'desc',
     String? search,
-    String? company,
-    String? type,
+    String? vehicleType,
     String? brand,
     String? model,
+    String? fuelType,
     String? status,
   }) async {
+    final cleanSearch = _cleanParam(search);
+    final cleanType = _cleanParam(vehicleType);
+    final cleanBrand = _cleanParam(brand);
+    final cleanModel = _cleanParam(model);
+    final cleanFuel = _cleanParam(fuelType);
+    final cleanStatus = _cleanParam(status);
+
     try {
       final response = await _apiService.getVehicles(
         page: page,
         size: size,
         sortBy: sortBy,
         sortDir: sortDir,
-        search: search != null && search.trim().isNotEmpty ? search.trim() : null,
-        company: company != null && company.trim().isNotEmpty ? company.trim() : null,
-        type: type != null && type.trim().isNotEmpty ? type.trim() : null,
-        brand: brand != null && brand.trim().isNotEmpty ? brand.trim() : null,
-        model: model != null && model.trim().isNotEmpty ? model.trim() : null,
-        status: status != null && status.trim().isNotEmpty ? status.trim() : null,
+        search: cleanSearch,
+        vehicleType: cleanType,
+        brand: cleanBrand,
+        model: cleanModel,
+        fuelType: cleanFuel,
+        status: cleanStatus,
       );
 
       if (response.data == null) {
@@ -62,6 +92,30 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
       }
       return response.data!;
     } on DioException catch (e) {
+      if (e.response?.statusCode == 400 && cleanStatus != null) {
+        final alias = _legacyStatusAlias(cleanStatus);
+        if (alias != null && alias != cleanStatus) {
+          try {
+            final retryResponse = await _apiService.getVehicles(
+              page: page,
+              size: size,
+              sortBy: sortBy,
+              sortDir: sortDir,
+              search: cleanSearch,
+              vehicleType: cleanType,
+              brand: cleanBrand,
+              model: cleanModel,
+              fuelType: cleanFuel,
+              status: alias,
+            );
+            if (retryResponse.data != null) {
+              return retryResponse.data!;
+            }
+          } on DioException catch (retryError) {
+            throw handleDioError(retryError);
+          }
+        }
+      }
       throw handleDioError(e);
     }
   }

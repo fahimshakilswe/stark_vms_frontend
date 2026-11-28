@@ -1,46 +1,213 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Stark Group Vehicle Management System — Enterprise Fleet Operations Portal">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="stark_vms_frontend">
+  <meta name="apple-mobile-web-app-title" content="Stark Group VMS">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>stark_vms_frontend</title>
+  <title>Stark Group VMS</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background-color: #F5F7FA;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1F2937;
+    }
+
+    #stark-boot-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #F5F7FA;
+      transition: opacity 200ms ease-out;
+    }
+
+    .boot-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 32px 36px;
+      width: min(400px, calc(100vw - 32px));
+      box-shadow: 0 4px 16px rgba(31, 78, 121, 0.08);
+      text-align: center;
+    }
+
+    .boot-logo {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      border-radius: 10px;
+      background-color: #1F4E79;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .boot-title {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1F4E79;
+    }
+
+    .boot-subtitle {
+      margin: 0 0 22px;
+      font-size: 13px;
+      color: #4B5563;
+    }
+
+    .boot-progress-track {
+      height: 6px;
+      width: 100%;
+      background-color: #E2E8F0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .boot-progress-bar {
+      height: 100%;
+      width: 38%;
+      background-color: #5B9BD5;
+      border-radius: 999px;
+      animation: stark-indeterminate 1.3s ease-in-out infinite;
+    }
+
+    @keyframes stark-indeterminate {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(300%); }
+    }
+
+    #stark-boot-timeout {
+      display: none;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #6B7280;
+    }
+
+    #stark-boot-error {
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      background-color: #FFEBEE;
+      border: 1px solid #FFCDD2;
+      color: #D32F2F;
+      font-size: 12.5px;
+      text-align: left;
+      word-break: break-word;
+    }
+
+    .boot-retry-btn {
+      display: none;
+      margin: 14px auto 0;
+      padding: 9px 18px;
+      background-color: #5B9BD5;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .boot-retry-btn:hover {
+      background-color: #4A88BF;
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <div id="stark-boot-loader" role="status" aria-live="polite">
+    <div class="boot-card">
+      <div class="boot-logo">SG</div>
+      <h1 class="boot-title">Stark Group VMS</h1>
+      <p id="stark-boot-status" class="boot-subtitle">Initializing fleet management portal...</p>
+      <div id="stark-boot-progress" class="boot-progress-track">
+        <div class="boot-progress-bar"></div>
+      </div>
+      <p id="stark-boot-timeout">Still loading resources. Please ensure the app server is running.</p>
+      <div id="stark-boot-error"></div>
+      <button id="stark-boot-retry" class="boot-retry-btn" type="button" onclick="window.location.reload()">
+        Reload Application
+      </button>
+    </div>
+  </div>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <script>
+    (function() {
+      var bootDone = false;
+      var timeoutTimer = setTimeout(function() {
+        if (!bootDone) {
+          var hint = document.getElementById("stark-boot-timeout");
+          var retry = document.getElementById("stark-boot-retry");
+          if (hint) hint.style.display = "block";
+          if (retry) retry.style.display = "inline-block";
+        }
+      }, 15000);
+
+      window.__hideBootLoader = function() {
+        bootDone = true;
+        clearTimeout(timeoutTimer);
+        var loader = document.getElementById("stark-boot-loader");
+        if (loader) {
+          loader.style.opacity = "0";
+          setTimeout(function() {
+            if (loader && loader.parentNode) {
+              loader.parentNode.removeChild(loader);
+            }
+          }, 220);
+        }
+      };
+
+      window.__showBootError = function(message) {
+        bootDone = true;
+        clearTimeout(timeoutTimer);
+        var status = document.getElementById("stark-boot-status");
+        var progress = document.getElementById("stark-boot-progress");
+        var timeoutHint = document.getElementById("stark-boot-timeout");
+        var errBox = document.getElementById("stark-boot-error");
+        var retryBtn = document.getElementById("stark-boot-retry");
+        if (status) status.textContent = "Unable to start Stark Group VMS";
+        if (progress) progress.style.display = "none";
+        if (timeoutHint) timeoutHint.style.display = "none";
+        if (errBox) {
+          errBox.textContent = message || "An unexpected error occurred while initializing the web application.";
+          errBox.style.display = "block";
+        }
+        if (retryBtn) retryBtn.style.display = "inline-block";
+      };
+
+      window.addEventListener("error", function(event) {
+        if (!bootDone && event && event.message) {
+          window.__showBootError(event.message);
+        }
+      });
+    })();
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

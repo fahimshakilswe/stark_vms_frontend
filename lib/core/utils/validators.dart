@@ -11,6 +11,7 @@ class Validators {
   static final RegExp _hasDigit = RegExp(r'[0-9]');
   static final RegExp _hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>\-_=+]');
   static final RegExp _hasWhitespace = RegExp(r'\s');
+  static final RegExp _phoneRegExp = RegExp(r'^\+?[0-9\s\-()]{7,30}$');
 
   /// Validates full name (2-100 characters)
   static String? validateFullName(String? value) {
@@ -43,12 +44,6 @@ class Validators {
   }
 
   /// Validates password according to backend @StrongPassword specification:
-  /// - 8 to 64 characters
-  /// - No whitespace
-  /// - At least 1 uppercase letter
-  /// - At least 1 lowercase letter
-  /// - At least 1 digit
-  /// - At least 1 special character
   static String? validateStrongPassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
@@ -96,40 +91,27 @@ class Validators {
     return null;
   }
 
-  /// Validates vehicle number (max 50 chars)
+  /// Validates vehicle number (max 50 chars, required)
   static String? validateVehicleNumber(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Vehicle number is required';
     }
-    if (value.trim().length > 50) {
+    final clean = value.trim();
+    if (clean.length > 50) {
       return 'Vehicle number cannot exceed 50 characters';
     }
     return null;
   }
 
-  /// Validates vehicle company (max 100 chars)
-  static String? validateCompany(String? value) {
+  /// Validates vehicle type (required)
+  static String? validateVehicleType(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Company is required';
-    }
-    if (value.trim().length > 100) {
-      return 'Company cannot exceed 100 characters';
+      return 'Vehicle type is required';
     }
     return null;
   }
 
-  /// Validates vehicle type (max 50 chars)
-  static String? validateType(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Type is required';
-    }
-    if (value.trim().length > 50) {
-      return 'Type cannot exceed 50 characters';
-    }
-    return null;
-  }
-
-  /// Validates vehicle brand (max 50 chars)
+  /// Validates vehicle brand (required, max 50 chars)
   static String? validateBrand(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Brand is required';
@@ -140,7 +122,7 @@ class Validators {
     return null;
   }
 
-  /// Validates vehicle model (max 50 chars)
+  /// Validates vehicle model (required, max 50 chars)
   static String? validateModel(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Model is required';
@@ -151,13 +133,86 @@ class Validators {
     return null;
   }
 
-  /// Validates vehicle status (max 30 chars)
+  /// Validates fuel type (required)
+  static String? validateFuelType(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Fuel type is required';
+    }
+    return null;
+  }
+
+  /// Validates manufacturing year (optional, but if provided must be between 1900 and current year)
+  static String? validateManufacturingYear(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    final year = int.tryParse(value.trim());
+    if (year == null) {
+      return 'Please enter a valid year';
+    }
+    if (year < 1900) {
+      return 'Manufacturing year must be at least 1900';
+    }
+    final currentYear = DateTime.now().year;
+    if (year > currentYear) {
+      return 'Manufacturing year cannot be in the future (max $currentYear)';
+    }
+    return null;
+  }
+
+  /// Validates vehicle exterior color (optional, max 50 chars)
+  static String? validateColor(String? value) {
+    if (value != null && value.trim().length > 50) {
+      return 'Color cannot exceed 50 characters';
+    }
+    return null;
+  }
+
+  /// Validates seating capacity (optional, but if provided must be positive integer > 0)
+  static String? validateSeatingCapacity(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    final seats = int.tryParse(value.trim());
+    if (seats == null) {
+      return 'Please enter a valid number';
+    }
+    if (seats <= 0) {
+      return 'Seating capacity must be greater than 0';
+    }
+    if (seats > 500) {
+      return 'Seating capacity seems invalid (max 500)';
+    }
+    return null;
+  }
+
+  /// Validates driver name (optional, max 100 chars)
+  static String? validateDriverName(String? value) {
+    if (value != null && value.trim().length > 100) {
+      return 'Driver name cannot exceed 100 characters';
+    }
+    return null;
+  }
+
+  /// Validates driver phone (optional, but if provided must match valid pattern and max 30 chars)
+  static String? validateDriverPhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    final clean = value.trim();
+    if (clean.length > 30) {
+      return 'Driver phone cannot exceed 30 characters';
+    }
+    if (!_phoneRegExp.hasMatch(clean)) {
+      return 'Please enter a valid phone number (e.g. +8801711000001)';
+    }
+    return null;
+  }
+
+  /// Validates vehicle status (required)
   static String? validateStatus(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Status is required';
-    }
-    if (value.trim().length > 30) {
-      return 'Status cannot exceed 30 characters';
     }
     return null;
   }
