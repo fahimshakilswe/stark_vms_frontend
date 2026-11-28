@@ -27,6 +27,67 @@ class VehicleRepositoryImpl implements VehicleRepository {
     String? status,
   }) async {
     try {
+      final targetStatus =
+          (status != null && status.trim().isNotEmpty)
+              ? VehicleStatus.fromString(status)
+              : null;
+
+      // When filtering by status, fetch matching records across pages without
+      // the single-string backend `status=` WHERE clause so legacy/mixed DB
+      // representations (e.g. 'MAINTENANCE' vs 'Maintence') are all included
+      // consistently with Dashboard statistics.
+      if (targetStatus != null) {
+        final matching = <VehicleEntity>[];
+        int batchPage = 0;
+        const int batchSize = 100;
+
+        while (true) {
+          final pageModel = await _remoteDataSource.getVehicles(
+            page: batchPage,
+            size: batchSize,
+            sortBy: sortBy,
+            sortDir: sortDir,
+            search: search,
+            vehicleType: vehicleType,
+            brand: brand,
+            model: model,
+            fuelType: fuelType,
+          );
+
+          for (final item in pageModel.content) {
+            if (VehicleStatus.fromString(item.status) == targetStatus) {
+              matching.add(item.toEntity());
+            }
+          }
+
+          if (pageModel.last || pageModel.content.isEmpty) {
+            break;
+          }
+          batchPage++;
+        }
+
+        final safePage = page < 0 ? 0 : page;
+        final safeSize = size < 1 ? 10 : size;
+        final totalElements = matching.length;
+        final totalPages =
+            totalElements == 0 ? 0 : (totalElements / safeSize).ceil();
+        final start = safePage * safeSize;
+        final end = (start + safeSize).clamp(0, totalElements);
+        final pageItems = start < totalElements
+            ? matching.sublist(start, end)
+            : <VehicleEntity>[];
+        final isLast = totalPages == 0 || safePage >= totalPages - 1;
+
+        return VehiclePageEntity(
+          vehicles: pageItems,
+          pageNumber: safePage,
+          pageSize: safeSize,
+          totalElements: totalElements,
+          totalPages: totalPages,
+          isLast: isLast,
+        );
+      }
+
       final pageModel = await _remoteDataSource.getVehicles(
         page: page,
         size: size,

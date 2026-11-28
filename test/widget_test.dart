@@ -244,6 +244,10 @@ void main() {
             metrics.underMaintenance,
         metrics.totalVehicles,
       );
+
+      final maintenancePage = await repo.getVehicles(status: 'MAINTENANCE');
+      expect(maintenancePage.totalElements, 2);
+      expect(maintenancePage.vehicles.length, 2);
     });
   });
 
